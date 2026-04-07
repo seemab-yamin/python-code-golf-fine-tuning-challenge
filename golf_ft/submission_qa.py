@@ -10,6 +10,7 @@ from typing import Any
 
 from golf_ft.data_pipeline import load_jsonl
 from golf_ft.mini_grader import validate_submission_row
+from golf_ft.paths import DEFAULT_SUBMISSION_CSV, TEST_JSONL
 
 
 def validate_submission_csv(
@@ -97,12 +98,14 @@ def main() -> None:
     ap.add_argument(
         "--csv",
         type=Path,
-        default=Path(__file__).resolve().parent.parent / "submission.csv",
+        default=DEFAULT_SUBMISSION_CSV,
+        help="default: working/submission.csv",
     )
     ap.add_argument(
         "--test",
         type=Path,
-        default=Path(__file__).resolve().parent.parent / "test.jsonl",
+        default=TEST_JSONL,
+        help="default: dataset/public/test.jsonl",
     )
     ap.add_argument(
         "--replay-visible",

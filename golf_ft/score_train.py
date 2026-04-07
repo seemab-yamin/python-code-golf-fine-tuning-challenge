@@ -11,6 +11,7 @@ from pathlib import Path
 
 from golf_ft.data_pipeline import load_jsonl
 from golf_ft.mini_grader import validate_submission_row
+from golf_ft.paths import TRAIN_JSONL
 
 
 def train_weighted_golf_score(
@@ -79,7 +80,8 @@ def main() -> None:
     ap.add_argument(
         "--train",
         type=Path,
-        default=Path(__file__).resolve().parent.parent / "train.jsonl",
+        default=TRAIN_JSONL,
+        help="default: dataset/public/train.jsonl",
     )
     ap.add_argument("--subprocess", action="store_true")
     args = ap.parse_args()

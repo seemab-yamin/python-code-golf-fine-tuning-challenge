@@ -13,6 +13,11 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 
 from golf_ft.data_pipeline import load_jsonl, serialize_task, system_prompt
 from golf_ft.mini_grader import extract_lambda_string, validate_submission_row
+from golf_ft.paths import (
+    DEFAULT_LORA_ADAPTER_DIR,
+    DEFAULT_SUBMISSION_CSV,
+    TEST_JSONL,
+)
 from golf_ft.submission_qa import validate_submission_csv
 
 # Best-of-N generations; pick shortest correct on visible examples (README rewards brevity).
@@ -127,18 +132,20 @@ def main() -> None:
     ap.add_argument(
         "--test-jsonl",
         type=Path,
-        default=Path(__file__).resolve().parent.parent / "test.jsonl",
+        default=TEST_JSONL,
+        help="default: dataset/public/test.jsonl (challenge file)",
     )
     ap.add_argument(
         "--out",
         type=Path,
-        default=Path(__file__).resolve().parent.parent / "submission.csv",
+        default=DEFAULT_SUBMISSION_CSV,
+        help="default: working/submission.csv",
     )
     ap.add_argument("--model", type=str, default="Qwen/Qwen2.5-0.5B-Instruct")
     ap.add_argument(
         "--adapter",
         type=Path,
-        default=Path(__file__).resolve().parent.parent / "outputs" / "lora" / "adapter",
+        default=DEFAULT_LORA_ADAPTER_DIR,
     )
     ap.add_argument("--no-adapter", action="store_true")
     ap.add_argument(

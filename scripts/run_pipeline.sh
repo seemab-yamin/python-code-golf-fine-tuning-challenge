@@ -31,10 +31,10 @@ if [[ "${SMOKE:-}" == "1" ]]; then
     --no-subprocess \
     --model-row-limit 5 \
     --skip-qa
-  python -m golf_ft.submission_qa --csv submission.csv --no-subprocess
+  python -m golf_ft.submission_qa --no-subprocess
 else
   python -m golf_ft.train_lora
   python -m golf_ft.infer
 fi
 
-echo "Done. Optional: python -m golf_ft.submission_qa --csv submission.csv --replay-visible --test test.jsonl"
+echo "Done. Predictions: working/submission.csv (optional QA: python -m golf_ft.submission_qa --replay-visible)"

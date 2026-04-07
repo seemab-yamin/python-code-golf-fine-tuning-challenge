@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any, Callable, Iterator
 
 from golf_ft.constraints import ALLOWED_BUILTINS, ALLOWED_MODULES
+from golf_ft.paths import DEFAULT_TRAIN_MESSAGES_JSON, TRAIN_JSONL
 
 # Train-only description wraps (identity first).
 DESC_AUGMENT_WRAP: tuple[Callable[[str], str], ...] = (
@@ -186,12 +187,13 @@ def main() -> None:
     ap.add_argument(
         "--train",
         type=Path,
-        default=Path(__file__).resolve().parent.parent / "train.jsonl",
+        default=TRAIN_JSONL,
+        help="default: dataset/public/train.jsonl (challenge file)",
     )
     ap.add_argument(
         "--out",
         type=Path,
-        default=Path(__file__).resolve().parent.parent / "data" / "train_messages.json",
+        default=DEFAULT_TRAIN_MESSAGES_JSON,
     )
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--shuffles", type=int, default=3)

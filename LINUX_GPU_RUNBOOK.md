@@ -26,7 +26,7 @@ ssh user@your-gpu-host
 cd ~/code-golf-ft
 ```
 
-Ensure these files exist at the repo root: `train.jsonl`, `test.jsonl`, `sample_submission.csv`, and the `golf_ft/` package.
+Ensure challenge files exist under **`dataset/public/`**: `train.jsonl`, `test.jsonl`, `sample_submission.csv` (from the organizer zip), plus the `golf_ft/` package.
 
 ## 3. Virtual environment and CUDA PyTorch
 
@@ -73,7 +73,7 @@ NO_MIRROR=1 ./scripts/run_pipeline.sh          # use huggingface.co
 ./scripts/run_pipeline.sh
 ```
 
-By default this writes `submission.csv` in the **repo root** (not under `working/`). After it finishes, move or rerun infer with `--out working/submission.csv` if the platform expects that path, and run `submission_qa` on the same path.
+By default this writes **`working/submission.csv`** (see `golf_ft/paths.py`). Run `submission_qa` on that path if you skipped QA inside `infer`.
 
 ## 5. Build training conversations (optional cache)
 
@@ -150,13 +150,13 @@ python -m golf_ft.submission_qa --csv working/submission.csv
 Include visible-example replay:
 
 ```bash
-path_to_test="$(pwd)/test.jsonl"
+path_to_test="$(pwd)/dataset/public/test.jsonl"
 python -m golf_ft.submission_qa --csv working/submission.csv --test "$path_to_test" --replay-visible
 ```
 
 ## 9. Optional: train-set weighted score (tuning)
 
-If you generated predictions for **train** task ids with reference code in `train.jsonl`:
+If you generated predictions for **train** task ids with reference code in `dataset/public/train.jsonl`:
 
 ```bash
 python -m golf_ft.score_train --csv my_train_predictions.csv
@@ -185,7 +185,7 @@ scp -r user@your-gpu-host:~/code-golf-ft/outputs/lora/adapter ./adapter-backup
 1. `nvidia-smi` works.
 2. `./scripts/setup_venv_linux_gpu.sh` and `torch.cuda.is_available()` is True.
 3. (Optional) `source scripts/env_hf_mirror.sh`.
-4. `python -m golf_ft.data_pipeline`.
+4. `python -m golf_ft.data_pipeline` (reads `dataset/public/train.jsonl`).
 5. `python -m golf_ft.train_lora ...` (or `--max-steps 1` smoke).
 6. `mkdir -p working` → `python -m golf_ft.infer --out working/submission.csv --device cuda`.
 7. `python -m golf_ft.submission_qa --csv working/submission.csv`.

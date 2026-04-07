@@ -93,6 +93,9 @@ Each examples entry has the form:
 
 The released split uses dense integer ids starting at 1 within each split.
 
+Repository layout (experimentation in this codebase)
+The official challenge files are kept under `dataset/public/` (same names as in the competition zip: `train.jsonl`, `test.jsonl`, `sample_submission.csv`). All CLI defaults use these paths via `golf_ft/paths.py` so experiments target organizer data, not ad-hoc copies. Model outputs for submission go to `working/submission.csv` by default.
+
 Allowed Python subset
 The official grader evaluates submissions inside an isolated worker that accepts only a small expression-oriented subset of Python. Submissions must be single lambda expressions.
 
@@ -209,6 +212,6 @@ This sets `HF_ENDPOINT=https://hf-mirror.com` (used by `transformers` / `hugging
 Build training JSON: `python -m golf_ft.data_pipeline`.
 Fine-tune: `python -m golf_ft.train_lora` (optional `--max-steps N` for a smoke run).
 One-shot pipeline (train + infer + QA): `./scripts/run_pipeline.sh` — set `SMOKE=1` for a short run (`--max-steps 2` and `--model-row-limit 5` on infer); set `NO_MIRROR=1` to skip `hf-mirror.com`.
-Infer: `python -m golf_ft.infer` (writes `submission.csv` at the repo root by default and runs shape QA unless `--skip-qa`; uses several generation attempts by default and keeps the shortest visible-correct lambda — add `--quick-infer` for only two attempts). For a cheap connectivity test use `--model-row-limit N` (first N tasks use the model, rest `lambda x:x`; use `-1` / omit for all 200). For the platform path above, use `python -m golf_ft.infer --out working/submission.csv` after creating a `working` directory (or copy the CSV there before upload).
-Validate a CSV only: `python -m golf_ft.submission_qa --csv submission.csv` (add `--replay-visible --test test.jsonl` to re-check visible examples).
-Train-set weighted score (references from `train.jsonl`): `python -m golf_ft.score_train --csv path/to.csv` — CSV must list **train** task ids (e.g. a holdout prediction file), not the 200-row test submission.
+Infer: `python -m golf_ft.infer` reads `dataset/public/test.jsonl` by default and writes `working/submission.csv`, then runs shape QA unless `--skip-qa`. It tries several generations and keeps the shortest lambda that passes visible checks (`--quick-infer` for two attempts only). Use `--model-row-limit N` for a cheap test (first N rows use the model). Override inputs/outputs with `--test-jsonl` / `--out` if needed.
+Validate a CSV: `python -m golf_ft.submission_qa` (defaults: `working/submission.csv` + `dataset/public/test.jsonl` for `--replay-visible`).
+Train-set weighted score: `python -m golf_ft.score_train --csv path/to.csv` (references `dataset/public/train.jsonl`; CSV must use **train** task ids, not the 200-row test file).
