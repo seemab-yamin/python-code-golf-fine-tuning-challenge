@@ -1,0 +1,4 @@
+# Install PyTorch with CUDA separately (see LINUX_GPU_RUNBOOK.md or scripts/setup_venv_linux_gpu.sh).
+transformers>=4.44.0
+peft>=0.12.0
+accelerate>=0.33.0

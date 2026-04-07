@@ -14,7 +14,7 @@ if [[ "${NO_MIRROR:-}" != "1" ]] && [[ -f scripts/env_hf_mirror.sh ]]; then
 fi
 
 if [[ ! -x .venv/bin/python ]]; then
-  echo "Run ./scripts/setup_venv.sh first"
+  echo "Create a venv first: ./scripts/setup_venv.sh (macOS/CPU) or ./scripts/setup_venv_linux_gpu.sh (Linux + NVIDIA CUDA)."
   exit 1
 fi
 # shellcheck source=/dev/null

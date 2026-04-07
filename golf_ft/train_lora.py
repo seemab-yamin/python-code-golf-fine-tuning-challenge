@@ -1,6 +1,7 @@
 """
 LoRA fine-tuning for code-golf lambda generation; held-out train rows for mini-grader eval.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -95,7 +96,12 @@ class Collator:
 
 def _lora_targets(model_name: str) -> list[str]:
     lower = model_name.lower()
-    if "qwen" in lower or "llama" in lower or "mistral" in lower or "tinyllama" in lower:
+    if (
+        "qwen" in lower
+        or "llama" in lower
+        or "mistral" in lower
+        or "tinyllama" in lower
+    ):
         return [
             "q_proj",
             "k_proj",
@@ -139,7 +145,9 @@ def run_validation(
                 do_sample=False,
                 pad_token_id=tokenizer.pad_token_id or tokenizer.eos_token_id,
             )
-        gen = tokenizer.decode(out[0][inputs["input_ids"].shape[1] :], skip_special_tokens=True)
+        gen = tokenizer.decode(
+            out[0][inputs["input_ids"].shape[1] :], skip_special_tokens=True
+        )
         code = extract_lambda_string(gen)
         good, _ = validate_submission_row(code, rec["examples"], use_subprocess=False)
         if good:
@@ -173,7 +181,9 @@ def main() -> None:
         default=-1,
         help="if >0, override num_train_epochs and run this many steps (smoke test)",
     )
-    ap.add_argument("--skip-train", action="store_true", help="only run val on base model")
+    ap.add_argument(
+        "--skip-train", action="store_true", help="only run val on base model"
+    )
     ap.add_argument(
         "--no-desc-aug",
         action="store_true",

@@ -194,7 +194,9 @@ The site also tracks **submission credits** (a limited number of graded submissi
 Submissions are **graded against the current problem version** on the site (when the problem is updated, newer versions replace older ones for scoring).
 
 ## Local workflow (this repo)
-Use a virtualenv and install deps: `./scripts/setup_venv.sh`, then `source .venv/bin/activate`.
+**Remote Linux GPU (recommended for training):** step-by-step guide in [LINUX_GPU_RUNBOOK.md](LINUX_GPU_RUNBOOK.md) (CUDA venv, `working/submission.csv`, scp, troubleshooting).
+
+On your own machine: `./scripts/setup_venv.sh`, then `source .venv/bin/activate`.
 
 **Hugging Face Hub mirror:** If `huggingface.co` is slow or blocked, point the Hub client at [hf-mirror.com](https://hf-mirror.com) before any command that downloads models:
 
