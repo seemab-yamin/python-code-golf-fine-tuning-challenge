@@ -6,7 +6,7 @@ Use this on a rented or lab **Linux x86_64 machine with an NVIDIA GPU** (CUDA). 
 
 - **NVIDIA driver** installed on the host (e.g. `nvidia-smi` works).
 - **Python 3.10+** (3.11 or 3.12 is fine).
-- **Git** (optional) or copy the project directory to the server as a zip.
+- **Git** (for cloning this repository).
 - Network access to download models (or use the Hub mirror in §3).
 
 Check GPU:
@@ -18,34 +18,69 @@ python3 --version
 
 ## 2. Get the code and data
 
-From your laptop, copy the whole challenge folder to the server (example with `scp`):
+On the GPU machine, clone the repository. **Prefer HTTPS** for a public repo (no SSH host-key setup):
 
 ```bash
-scp -r "/path/to/Python Code Golf Fine-Tuning Challenge" user@your-gpu-host:~/code-golf-ft
-ssh user@your-gpu-host
-cd ~/code-golf-ft
+git clone https://github.com/seemab-yamin/python-code-golf-fine-tuning-challenge.git
+cd python-code-golf-fine-tuning-challenge
 ```
 
-Ensure challenge files exist under **`dataset/public/`**: `train.jsonl`, `test.jsonl`, `sample_submission.csv` (from the organizer zip), plus the `golf_ft/` package.
+SSH (only if you use SSH keys with GitHub and `github.com` is in `~/.ssh/known_hosts`):
+
+```bash
+git clone git@github.com:seemab-yamin/python-code-golf-fine-tuning-challenge.git
+cd python-code-golf-fine-tuning-challenge
+```
+
+**`Host key verification failed`** does *not* mean the repo is private. It means SSH does not trust `github.com` yet (or the session cannot write `known_hosts`). Fix: use **HTTPS** above, or run `ssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts` once (compare fingerprints with [GitHub’s SSH docs](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/githubs-ssh-key-fingerprints) if you need strict verification).
+
+The repo includes challenge assets under **`dataset/public/`**: `train.jsonl`, `test.jsonl`, and `sample_submission.csv`. If that folder is missing files (e.g. LFS or a slim clone), copy them from the official competition zip into `dataset/public/` so paths match `golf_ft/paths.py`.
 
 ## 3. Virtual environment and CUDA PyTorch
 
 PyTorch must be installed from the **PyTorch CUDA wheel index**; a plain `pip install torch` often gives a CPU-only build.
 
-Pick a CUDA build that matches your driver (see [PyTorch install](https://pytorch.org/get-started/locally/)). Common choice today is **cu124**:
+### Colab-friendly venv (`virtualenv`, not `python3 -m venv`)
+
+On **Google Colab** and many **Debian** images, `python3 -m venv` fails with **`ensurepip` errors**. [`scripts/setup_venv_linux_gpu.sh`](scripts/setup_venv_linux_gpu.sh) creates **`.venv` with `virtualenv`** first, then falls back to `python3 -m venv` only if needed.
+
+**Shell tip:** do not type `!chmod` in bash — `!` triggers history expansion. Use `chmod +x ...` only.
+
+**`TORCH_CUDA` vs nvidia-smi:** the line **CUDA Version: 13.0** in `nvidia-smi` is the **driver’s maximum** capability, **not** a PyTorch wheel name. There is typically **no** `cu130` index. Use a published tag (default **`cu124`**) unless [PyTorch’s install matrix](https://pytorch.org/get-started/locally/) shows otherwise:
 
 ```bash
-cd ~/code-golf-ft
+cd ~/python-code-golf-fine-tuning-challenge
 chmod +x scripts/setup_venv_linux_gpu.sh
-```
-
-Optional: pick another bundle (examples: `cu121`, `cu118`):
-
-```bash
-export TORCH_CUDA=cu124
+# Default TORCH_CUDA=cu124 is usually correct for a T4 + recent driver
 ./scripts/setup_venv_linux_gpu.sh
 source .venv/bin/activate
 ```
+
+Optional: another wheel bundle (if listed on PyTorch’s site):
+
+```bash
+export TORCH_CUDA=cu121
+./scripts/setup_venv_linux_gpu.sh
+```
+
+The script **warns** if `TORCH_CUDA` is not a common tag but still tries the URL.
+
+**Manual virtualenv** (if you skip the script’s create step):
+
+```bash
+python3 -m pip install virtualenv
+rm -rf .venv   # if a broken partial venv exists
+python3 -m virtualenv .venv
+source .venv/bin/activate
+pip install --upgrade pip
+pip install torch --index-url "https://download.pytorch.org/whl/cu124"
+pip install -r requirements-no-torch.txt
+```
+
+**Alternates**
+
+- **Apt + stdlib venv** (VM with sudo): `sudo apt-get install -y python3.12-venv` then `python3 -m venv .venv` and install torch as above.
+- **Colab, no venv:** if the runtime already has `torch` + CUDA, run `pip install transformers peft accelerate` only and use the repo from `/content/...`.
 
 Verify CUDA from Python:
 
@@ -166,8 +201,8 @@ python -m golf_ft.score_train --csv my_train_predictions.csv
 
 ```bash
 # From your laptop
-scp user@your-gpu-host:~/code-golf-ft/working/submission.csv .
-scp -r user@your-gpu-host:~/code-golf-ft/outputs/lora/adapter ./adapter-backup
+scp user@your-gpu-host:~/python-code-golf-fine-tuning-challenge/working/submission.csv .
+scp -r user@your-gpu-host:~/python-code-golf-fine-tuning-challenge/outputs/lora/adapter ./adapter-backup
 ```
 
 ## 11. Troubleshooting
