@@ -127,6 +127,8 @@ python -m golf_ft.train_lora --out-dir outputs/lora_smoke --max-steps 1 --batch 
 ```
 
 - Training uses **bfloat16** when `torch.cuda.is_available()` (see `train_lora.py`).
+- On **CUDA**, **gradient checkpointing** is enabled by default to reduce VRAM (T4 / 16 GB class). Turn it off for speed on larger GPUs: `--no-gradient-checkpointing`.
+- If you still hit **CUDA OOM**, try shorter contexts: `--max-length 2048` or `--max-length 1024`, and/or `export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`.
 - Validation on a held-out slice of **train** rows is printed at the end; it runs visible examples only (same as local mini-grader).
 
 To skip training and only run validation on the base model:

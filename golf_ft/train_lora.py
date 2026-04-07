@@ -191,6 +191,11 @@ def main() -> None:
         action="store_true",
         help="disable description variants in training messages",
     )
+    ap.add_argument(
+        "--no-gradient-checkpointing",
+        action="store_true",
+        help="disable gradient checkpointing (faster on large GPUs; uses more VRAM)",
+    )
     args = ap.parse_args()
 
     torch.manual_seed(args.seed)
@@ -214,7 +219,7 @@ def main() -> None:
     train_dtype = torch.bfloat16 if use_cuda else torch.float32
     model = AutoModelForCausalLM.from_pretrained(
         args.model,
-        torch_dtype=train_dtype,
+        dtype=train_dtype,
         trust_remote_code=True,
     )
 
@@ -228,6 +233,11 @@ def main() -> None:
             task_type="CAUSAL_LM",
         )
         model = get_peft_model(model, lora)
+        use_gc = use_cuda and not args.no_gradient_checkpointing
+        if use_gc:
+            model.config.use_cache = False
+            model.enable_input_require_grads()
+            model.gradient_checkpointing_enable()
         ds = ChatSFTDataset(tokenizer, train_msgs, max_length=args.max_length)
         collator = Collator(tokenizer)
         train_kwargs: dict[str, Any] = dict(
@@ -239,6 +249,7 @@ def main() -> None:
             save_strategy="no",
             bf16=use_cuda,
             fp16=False,
+            gradient_checkpointing=use_gc,
             report_to=[],
         )
         if args.max_steps > 0:
@@ -263,7 +274,7 @@ def main() -> None:
     val_dtype = torch.bfloat16 if device == "cuda" else torch.float32
     base = AutoModelForCausalLM.from_pretrained(
         args.model,
-        torch_dtype=val_dtype,
+        dtype=val_dtype,
         trust_remote_code=True,
     ).to(device)
     tok = AutoTokenizer.from_pretrained(args.model, trust_remote_code=True)
