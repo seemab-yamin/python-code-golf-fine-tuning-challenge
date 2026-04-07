@@ -211,7 +211,6 @@ This sets `HF_ENDPOINT=https://hf-mirror.com` (used by `transformers` / `hugging
 
 Build training JSON: `python -m golf_ft.data_pipeline`.
 Fine-tune: `python -m golf_ft.train_lora` (optional `--max-steps N` for a smoke run).
-One-shot pipeline (train + infer + QA): `./scripts/run_pipeline.sh` — set `SMOKE=1` for a short run (`--max-steps 2` and `--model-row-limit 5` on infer); set `NO_MIRROR=1` to skip `hf-mirror.com`.
 Infer: `python -m golf_ft.infer` reads `dataset/public/test.jsonl` by default and writes `working/submission.csv`, then runs shape QA unless `--skip-qa`. It tries several generations and keeps the shortest lambda that passes visible checks (`--quick-infer` for two attempts only). Use `--model-row-limit N` for a cheap test (first N rows use the model). Override inputs/outputs with `--test-jsonl` / `--out` if needed.
 Validate a CSV: `python -m golf_ft.submission_qa` (defaults: `working/submission.csv` + `dataset/public/test.jsonl` for `--replay-visible`).
 Train-set weighted score: `python -m golf_ft.score_train --csv path/to.csv` (references `dataset/public/train.jsonl`; CSV must use **train** task ids, not the 200-row test file).

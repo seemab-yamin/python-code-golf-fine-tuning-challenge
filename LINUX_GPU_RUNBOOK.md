@@ -96,21 +96,7 @@ source scripts/env_hf_mirror.sh
 
 This sets `HF_ENDPOINT=https://hf-mirror.com` for `transformers` / `huggingface_hub`.
 
-## 4. One-shot pipeline script (optional)
-
-If the venv already has a working GPU `torch` (§3), you can run data → train → infer in one go:
-
-```bash
-source .venv/bin/activate
-# Optional: SMOKE=1 for a short train (--max-steps 2) and partial infer (see script).
-NO_MIRROR=1 ./scripts/run_pipeline.sh          # use huggingface.co
-# or omit NO_MIRROR to source scripts/env_hf_mirror.sh by default
-./scripts/run_pipeline.sh
-```
-
-By default this writes **`working/submission.csv`** (see `golf_ft/paths.py`). Run `submission_qa` on that path if you skipped QA inside `infer`.
-
-## 5. Build training conversations (optional cache)
+## 4. Build training conversations (optional cache)
 
 Regenerates `data/train_messages.json` (takes seconds):
 
@@ -118,7 +104,7 @@ Regenerates `data/train_messages.json` (takes seconds):
 python -m golf_ft.data_pipeline
 ```
 
-## 6. Fine-tune (LoRA)
+## 5. Fine-tune (LoRA)
 
 Default model is `Qwen/Qwen2.5-0.5B-Instruct` (small; adjust `--model` if you want a larger code model). Adapter and logs go under `outputs/lora/`.
 
@@ -149,7 +135,7 @@ To skip training and only run validation on the base model:
 python -m golf_ft.train_lora --skip-train --out-dir outputs/lora
 ```
 
-## 7. Inference and submission CSV
+## 6. Inference and submission CSV
 
 Create the platform layout directory and write predictions where many graders expect them:
 
@@ -174,7 +160,7 @@ Flags you may need:
 - `--skip-qa` — disable post-write CSV shape checks (not recommended).
 - `--qa-replay-visible` — after writing, re-run mini-grader on all **visible** `test.jsonl` examples (slow but strict).
 
-## 8. Validate the CSV without re-running inference
+## 7. Validate the CSV without re-running inference
 
 Shape only (200 rows, ids 1–200, header, non-empty codes):
 
@@ -189,7 +175,7 @@ path_to_test="$(pwd)/dataset/public/test.jsonl"
 python -m golf_ft.submission_qa --csv working/submission.csv --test "$path_to_test" --replay-visible
 ```
 
-## 9. Optional: train-set weighted score (tuning)
+## 8. Optional: train-set weighted score (tuning)
 
 If you generated predictions for **train** task ids with reference code in `dataset/public/train.jsonl`:
 
@@ -197,7 +183,7 @@ If you generated predictions for **train** task ids with reference code in `data
 python -m golf_ft.score_train --csv my_train_predictions.csv
 ```
 
-## 10. Copy results back to your machine
+## 9. Copy results back to your machine
 
 ```bash
 # From your laptop
@@ -205,7 +191,7 @@ scp user@your-gpu-host:~/python-code-golf-fine-tuning-challenge/working/submissi
 scp -r user@your-gpu-host:~/python-code-golf-fine-tuning-challenge/outputs/lora/adapter ./adapter-backup
 ```
 
-## 11. Troubleshooting
+## 10. Troubleshooting
 
 | Issue | What to try |
 |--------|-------------|
